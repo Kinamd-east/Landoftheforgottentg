@@ -40,7 +40,8 @@ const CoinApp = () => {
   const [energyUpgradePrice, setEnergyUpgradePrice] = useState(1000);
   const [uid, setUid] = useState(localStorage.getItem('uid') || generateUID());
   const [tapPosition, setTapPosition] = useState(null);
-  const [increments, setIncrements]= useState([]);
+  const [increments, setIncrements] = useState([]);
+  const [isPlanActive, setIsPlanActive] = useState(localStorage.getItem('isPlanActive'));
   const [tapEffect, setTapEffect] = useState(false);
   const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
@@ -67,14 +68,14 @@ const CoinApp = () => {
     // Attempt to retrieve the Telegram username
     const initializeUser = async () => {
       let username;
-      
+
       try {
         // This assumes you have access to Telegram WebApp SDK
         username = window.Telegram.WebApp.initDataUnsafe.user.username;
       } catch (error) {
         console.log("Telegram username not available:", error);
       }
-      
+
       const finalUid = username || uid;
       setUid(finalUid);
       localStorage.setItem('uid', finalUid);
@@ -85,8 +86,16 @@ const CoinApp = () => {
   }, [uid]);
 
   useEffect(() => {
+    const storedPlanActive = localStorage.getItem('isPlanActive');
+    if (storedPlanActive === 'true') {
+      setIsPlanActive(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      if (energy < maxEnergy && health < maxHealth) {
+      if (energy < maxEnergy && health < maxHealth && !isPlanActive) {
+        console.log(isPlanActive)
         setHealth(prev => Math.min(prev + 1, maxHealth));
         setEnergy(prev => Math.max(prev - 1, 0));
         updateDoc(doc(db, 'users', uid), { health: Math.min(health + 1, maxHealth), energy: Math.max(energy - 1, 0) });
@@ -96,6 +105,7 @@ const CoinApp = () => {
   }, [energy, health, maxEnergy, maxHealth, uid]);
 
   const loadUserData = async (uid) => {
+    console.log(isPlanActive)
     try {
       const userRef = doc(db, 'users', uid);
       const userSnap = await getDoc(userRef);
@@ -110,7 +120,7 @@ const CoinApp = () => {
         setMaxEnergy(userData.maxEnergy);
         setEnergyUpgradePrice(userData.energyUpgradePrice);
       } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: []  });
+        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -127,6 +137,16 @@ const CoinApp = () => {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left; // Relative x position
     const y = e.clientY - rect.top;   // Relative y position
+    const imageElement = e.currentTarget.querySelector('img');
+
+  if (imageElement) {
+    imageElement.classList.add('vibrate');
+
+    // Remove the class after the animation ends
+    setTimeout(() => {
+      imageElement.classList.remove('vibrate');
+    }, 300); // Match the duration of the animation (0.3s)
+  }
 
     // card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
     // setTimeout(() => {
@@ -175,27 +195,25 @@ const CoinApp = () => {
   const closeVictoryModal = () => {
     setShowVictoryModal(false);
   };
-  
-  let allowBannerSlideIn = false;
 
-function runInitialFunction() {
-    // This is the function that needs to run first
-    allowBannerSlideIn = true;
-    console.log('Initial function has run.');
-}
 
-function triggerBannerSlideIn() {
-    if (allowBannerSlideIn) {
-        setTimeout(() => {
-            const banner = document.getElementById('marketing-banner');
-            banner.classList.add('slide-in');
-        }, 5000);
-    }
-}
+  // function triggerBannerSlideIn() {
+  //   if (allowBannerSlideIn) {
+  //     setTimeout(() => {
+  //       const banner = document.getElementById('marketing-banner');
+  //       banner.classList.add('slide-in');
+  //     }, 5000);
+  //   }
+  // }
 
-// Example usage
-runInitialFunction(); // This function needs to be called first
-triggerBannerSlideIn(); // This triggers the banner animation after 5 seconds
+  function closeModal() {
+    const banner = document.getElementById('marketing-banner');
+banner?.classList.remove("slide-in");
+  }
+
+  // Example usage
+  // runInitialFunction(); // This function needs to be called first
+  // triggerBannerSlideIn(); // This triggers the banner animation after 5 seconds
 
 
   if (loading) return <LoadingPage />; // Show loading indicator
@@ -204,6 +222,49 @@ triggerBannerSlideIn(); // This triggers the banner animation after 5 seconds
     <div className="min-h-screen px-4 flex flex-col items-center text-white font-medium" style={{
       backgroundImage: `url(${back3})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', height: '100vh' // Ensures it takes the full viewport height
     }}>
+      <div
+          id="marketing-banner"
+          tabIndex={-1}
+          className="fixed z-50 flex flex-col md:flex-row justify-between flex-wrap max-w-full p-4 -translate-x-1/2 bg-white border border-gray-100 rounded-lg shadow-sm lg:max-w-7xl left-1/2 top-6 dark:bg-gray-700 dark:border-gray-600"
+        >
+          <div className="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0">
+
+            <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+              Purchase a Potion to protect your energy from being stolen by the enemy
+            </p>
+          </div>
+          <div className="flex items-center flex-shrink-0">
+            <a
+              href="/boost"
+              className="px-5 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >
+              Purchase
+            </a>
+            <button
+              data-dismiss-target="#marketing-banner"
+              type="button"
+              className="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white"
+              onClick={closeModal}
+            >
+              <svg
+                className="w-3 h-3"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 14 14"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                />
+              </svg>
+              <span className="sr-only">Close banner</span>
+            </button>
+          </div>
+        </div>
       <div className="fixed top-0 left-0 w-full px-4 pt-8 z-10 flex flex-col items-center text-white">
         <div className="w-full cursor-pointer">
           <div className="bg-[#1f1f1f] text-center py-2 rounded-xl">
@@ -312,48 +373,6 @@ triggerBannerSlideIn(); // This triggers the banner animation after 5 seconds
             </div>
           ))}
         </div>
-        <div
-  id="marketing-banner"
-  tabIndex={-1}
-  className="fixed z-50 flex flex-col md:flex-row justify-between w-[35rem] p-4 -translate-x-1/2 bg-white border border-gray-100 rounded-lg shadow-sm lg:max-w-7xl left-1/2 top-6 dark:bg-gray-700 dark:border-gray-600"
->
-  <div className="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0">
-    
-    <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
-      Purchase a Potion to protect your energy from being stolen by the enemy
-    </p>
-  </div>
-  <div className="flex items-center flex-shrink-0">
-    <a
-      href="/boost"
-      className="px-5 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    >
-      Purchase
-    </a>
-    <button
-      data-dismiss-target="#marketing-banner"
-      type="button"
-      className="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white"
-    >
-      <svg
-        className="w-3 h-3"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 14 14"
-      >
-        <path
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-        />
-      </svg>
-      <span className="sr-only">Close banner</span>
-    </button>
-  </div>
-</div>
 
 
       </div>

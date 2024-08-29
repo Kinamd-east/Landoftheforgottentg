@@ -120,6 +120,13 @@ function Boost() {
     }
   };
 
+  useEffect(() => {
+    const storedPlanActive = localStorage.getItem('isPlanActive');
+    if (storedPlanActive === 'true') {
+      setIsPlanActive(true);
+    }
+  }, []);
+
   const handleFirstShieldPotion = async (duration) => {
     // Add first shield potion logic here
     if (connected) {
@@ -144,6 +151,7 @@ function Boost() {
         setIsPlanActive(true);
         setPlanDuration(duration);
         // Store the activation timestamp and the selected duration
+        localStorage.setItem('isPlanActive', 'true');
         localStorage.setItem('activationTime', Date.now().toString());
         localStorage.setItem('planDuration', duration.toString());
         }
@@ -168,6 +176,7 @@ function Boost() {
         setIsPlanActive(true);
         setPlanDuration(duration);
         // Store the activation timestamp and the selected duration
+        localStorage.setItem('isPlanActive', 'true');
         localStorage.setItem('activationTime', Date.now().toString());
         localStorage.setItem('planDuration', duration.toString());
         }
@@ -192,6 +201,7 @@ function Boost() {
         setIsPlanActive(true);
         setPlanDuration(duration);
         // Store the activation timestamp and the selected duration
+        localStorage.setItem('isPlanActive', 'true');
         localStorage.setItem('activationTime', Date.now().toString());
         localStorage.setItem('planDuration', duration.toString());
       }
