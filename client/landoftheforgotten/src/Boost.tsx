@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { db } from './firebase';
+import { Link } from 'react-router-dom';
 import LoadingPage from './LoadingPage';
 // import {handleFirstShieldPotion} from './ShieldProtection'
 import { toNano } from '@ton/ton';
 import { useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { bear, coin, highVoltage, rocket, trophy, skeleton, heart, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8, background2 } from './images';
-import { background, back2, back3 } from './images';
+import { bear, coin, Arrow, highVoltage, rocket, trophy, skeleton, heart, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8, background2 } from './images';
 import { TonConnectButton } from '@tonconnect/ui-react';
 
 const generateUID = () => {
@@ -131,94 +131,98 @@ function Boost() {
     // Add first shield potion logic here
     if (connected) {
       if (duration === 7) {
-        if(isPlanActive === true) {
+        if (isPlanActive === true) {
           alert('You already have a plan active!')
         } else {
           const userAmount = (0.003 * 1e9).toString();
-        const transaction = {
-          validUntil: Math.floor(Date.now() / 1000) + 360,
-          messages: [
-            {
-              address: "0QCYM7d3gXybi1HNulFdLddRJvxECK2GruQRCeJmf9g7Rs7R", // destination address
-              amount: userAmount //Toncoin in nanotons
-            }
-          ]
+          const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 360,
+            messages: [
+              {
+                address: "0QCYM7d3gXybi1HNulFdLddRJvxECK2GruQRCeJmf9g7Rs7R", // destination address
+                amount: userAmount //Toncoin in nanotons
+              }
+            ]
 
-        }
-        await tonConnectUI.sendTransaction(transaction);
-        console.log(transaction)
-        console.log("User has payed for the 7 day plan for shield potion")
-        setIsPlanActive(true);
-        setPlanDuration(duration);
-        // Store the activation timestamp and the selected duration
-        localStorage.setItem('isPlanActive', 'true');
-        localStorage.setItem('activationTime', Date.now().toString());
-        localStorage.setItem('planDuration', duration.toString());
+          }
+          await tonConnectUI.sendTransaction(transaction);
+          console.log(transaction)
+          console.log("User has payed for the 7 day plan for shield potion")
+          setIsPlanActive(true);
+          setPlanDuration(duration);
+          // Store the activation timestamp and the selected duration
+          localStorage.setItem('isPlanActive', 'true');
+          localStorage.setItem('activationTime', Date.now().toString());
+          localStorage.setItem('planDuration', duration.toString());
         }
       } else if (duration === 14) {
-        if(isPlanActive === true) {
-        alert('You already have a plan active!')
+        if (isPlanActive === true) {
+          alert('You already have a plan active!')
         } else {
           const userAmount = (0.006 * 1e9).toString();
-        const transaction = {
-          validUntil: Math.floor(Date.now() / 1000) + 360,
-          messages: [
-            {
-              address: "0QCYM7d3gXybi1HNulFdLddRJvxECK2GruQRCeJmf9g7Rs7R", // destination address
-              amount: userAmount //Toncoin in nanotons
-            }
-          ]
+          const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 360,
+            messages: [
+              {
+                address: "0QCYM7d3gXybi1HNulFdLddRJvxECK2GruQRCeJmf9g7Rs7R", // destination address
+                amount: userAmount //Toncoin in nanotons
+              }
+            ]
 
-        }
-        await tonConnectUI.sendTransaction(transaction);
-        console.log(transaction)
-        console.log("User has payed for the 14 day plan for shield potion")
-        setIsPlanActive(true);
-        setPlanDuration(duration);
-        // Store the activation timestamp and the selected duration
-        localStorage.setItem('isPlanActive', 'true');
-        localStorage.setItem('activationTime', Date.now().toString());
-        localStorage.setItem('planDuration', duration.toString());
+          }
+          await tonConnectUI.sendTransaction(transaction);
+          console.log(transaction)
+          console.log("User has payed for the 14 day plan for shield potion")
+          setIsPlanActive(true);
+          setPlanDuration(duration);
+          // Store the activation timestamp and the selected duration
+          localStorage.setItem('isPlanActive', 'true');
+          localStorage.setItem('activationTime', Date.now().toString());
+          localStorage.setItem('planDuration', duration.toString());
         }
       } else if (duration === 21) {
-        if(isPlanActive === true) {
+        if (isPlanActive === true) {
           alert('You already have a plan active!')
         } else {
           const userAmount = (0.009 * 1e9).toString();
-        const transaction = {
-          validUntil: Math.floor(Date.now() / 1000) + 360,
-          messages: [
-            {
-              address: "0QCYM7d3gXybi1HNulFdLddRJvxECK2GruQRCeJmf9g7Rs7R", // destination address
-              amount: userAmount //Toncoin in nanotons
-            }
-          ]
+          const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 360,
+            messages: [
+              {
+                address: "0QCYM7d3gXybi1HNulFdLddRJvxECK2GruQRCeJmf9g7Rs7R", // destination address
+                amount: userAmount //Toncoin in nanotons
+              }
+            ]
 
+          }
+          await tonConnectUI.sendTransaction(transaction);
+          console.log(transaction)
+          console.log("User has payed for the 21 day plan for shield potion")
+          setIsPlanActive(true);
+          setPlanDuration(duration);
+          // Store the activation timestamp and the selected duration
+          localStorage.setItem('isPlanActive', 'true');
+          localStorage.setItem('activationTime', Date.now().toString());
+          localStorage.setItem('planDuration', duration.toString());
         }
-        await tonConnectUI.sendTransaction(transaction);
-        console.log(transaction)
-        console.log("User has payed for the 21 day plan for shield potion")
-        setIsPlanActive(true);
-        setPlanDuration(duration);
-        // Store the activation timestamp and the selected duration
-        localStorage.setItem('isPlanActive', 'true');
-        localStorage.setItem('activationTime', Date.now().toString());
-        localStorage.setItem('planDuration', duration.toString());
       }
     }
   }
-}
 
 
   if (loading) return <LoadingPage />; // Show loading indicator
 
   return (
     <div className="min-h-screen px-4 flex flex-col items-center text-white font-medium bg-[#1f1f1f]">
+      <Link to="/">
+        <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
 
-      <div className="absolute inset-0 h-1/2 bg-gradient-overlay z-0"></div>
-      <div className="absolute inset-0 flex items-center justify-center z-0">
+      </Link>
+
+      {/* <div className="absolute inset-0 h-1/2 bg-gradient-overlay z-0"></div> */}
+      {/* <div className="absolute inset-0 flex items-center justify-center z-0">
         <div className="radial-gradient-overlay"></div>
-      </div>
+      </div> */}
 
       <div className="z-10 min-h-screen flex flex-col items-center text-white">
 

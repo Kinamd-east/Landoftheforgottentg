@@ -139,14 +139,14 @@ const CoinApp = () => {
     const y = e.clientY - rect.top;   // Relative y position
     const imageElement = e.currentTarget.querySelector('img');
 
-  if (imageElement) {
-    imageElement.classList.add('vibrate');
+    if (imageElement) {
+      imageElement.classList.add('vibrate');
 
-    // Remove the class after the animation ends
-    setTimeout(() => {
-      imageElement.classList.remove('vibrate');
-    }, 300); // Match the duration of the animation (0.3s)
-  }
+      // Remove the class after the animation ends
+      setTimeout(() => {
+        imageElement.classList.remove('vibrate');
+      }, 300); // Match the duration of the animation (0.3s)
+    }
 
     // card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
     // setTimeout(() => {
@@ -208,7 +208,7 @@ const CoinApp = () => {
 
   function closeModal() {
     const banner = document.getElementById('marketing-banner');
-banner?.classList.remove("slide-in");
+    banner?.classList.remove("slide-in");
   }
 
   // Example usage
@@ -223,48 +223,48 @@ banner?.classList.remove("slide-in");
       backgroundImage: `url(${back3})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', height: '100vh' // Ensures it takes the full viewport height
     }}>
       <div
-          id="marketing-banner"
-          tabIndex={-1}
-          className="fixed z-50 flex flex-col md:flex-row justify-between flex-wrap max-w-full p-4 -translate-x-1/2 bg-white border border-gray-100 rounded-lg shadow-sm lg:max-w-7xl left-1/2 top-6 dark:bg-gray-700 dark:border-gray-600"
-        >
-          <div className="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0">
+        id="marketing-banner"
+        tabIndex={-1}
+        className="fixed z-50 flex flex-col md:flex-row justify-between flex-wrap max-w-full p-4 -translate-x-1/2 bg-white border border-gray-100 rounded-lg shadow-sm lg:max-w-7xl left-1/2 top-6 dark:bg-gray-700 dark:border-gray-600"
+      >
+        <div className="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0">
 
-            <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
-              Purchase a Potion to protect your energy from being stolen by the enemy
-            </p>
-          </div>
-          <div className="flex items-center flex-shrink-0">
-            <a
-              href="/boost"
-              className="px-5 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            >
-              Purchase
-            </a>
-            <button
-              data-dismiss-target="#marketing-banner"
-              type="button"
-              className="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white"
-              onClick={closeModal}
-            >
-              <svg
-                className="w-3 h-3"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 14 14"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                />
-              </svg>
-              <span className="sr-only">Close banner</span>
-            </button>
-          </div>
+          <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+            Purchase a Potion to protect your energy from being stolen by the enemy
+          </p>
         </div>
+        <div className="flex items-center flex-shrink-0">
+          <a
+            href="/boost"
+            className="px-5 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          >
+            Purchase
+          </a>
+          <button
+            data-dismiss-target="#marketing-banner"
+            type="button"
+            className="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white"
+            onClick={closeModal}
+          >
+            <svg
+              className="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span className="sr-only">Close banner</span>
+          </button>
+        </div>
+      </div>
       <div className="fixed top-0 left-0 w-full px-4 pt-8 z-10 flex flex-col items-center text-white">
         <div className="w-full cursor-pointer">
           <div className="bg-[#1f1f1f] text-center py-2 rounded-xl">
@@ -361,12 +361,12 @@ banner?.classList.remove("slide-in");
             <div
               key={click.id}
               className="absolute text-5xl font-bold opacity-100 text-white pointer-events-none increment"
-              // style={{
-              //   top: `${click.y}px`,
-              //   left: `${click.x}px`,
-              //   transform: 'translate(-50%, -50%)',
-              //   animation: 'float 1s ease-out'
-              // }}
+              style={{
+                top: `${click.y}px`,
+                left: `${click.x}px`,
+                transform: 'translate(-50%, -50%)',
+                animation: 'float 1s ease-out'
+              }}
               // onAnimationEnd={() => handleAnimationEnd(click.id)}
               onAnimationEnd={() => handleAnimationEnd(click.id)}>
               +{click.value}

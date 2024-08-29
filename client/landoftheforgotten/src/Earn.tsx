@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { db } from './firebase';
+import { Link } from 'react-router-dom';
 import LoadingPage from './LoadingPage';
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, QuerySnapshot, deleteDoc } from 'firebase/firestore';
-import { bear, coin, highVoltage, rocket, trophy, skeleton, heart, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8, background2 } from './images';
+import { bear, coin, Arrow, highVoltage, rocket, trophy, skeleton, heart, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8, background2 } from './images';
 import { background, back2, back3 } from './images';
 
 const generateUID = () => {
@@ -58,27 +59,27 @@ function Earn() {
 
     const loadUserData = async (uid) => {
         try {
-          const userRef = doc(db, 'users', uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            setPetals(userData.petals);
-            setBoostLevel(userData.boostLevel);
-            setBoostPrice(userData.boostPrice);
-            setHealth(userData.health);
-            setMaxHealth(userData.maxHealth);
-            setEnergy(userData.energy);
-            setMaxEnergy(userData.maxEnergy);
-            setEnergyUpgradePrice(userData.energyUpgradePrice);
-          } else {
-            await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
-          }
+            const userRef = doc(db, 'users', uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                setPetals(userData.petals);
+                setBoostLevel(userData.boostLevel);
+                setBoostPrice(userData.boostPrice);
+                setHealth(userData.health);
+                setMaxHealth(userData.maxHealth);
+                setEnergy(userData.energy);
+                setMaxEnergy(userData.maxEnergy);
+                setEnergyUpgradePrice(userData.energyUpgradePrice);
+            } else {
+                await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
+            }
         } catch (error) {
-          console.error('Error loading user data:', error);
+            console.error('Error loading user data:', error);
         } finally {
-          setLoading(false); // Set loading to false after data is fetched
+            setLoading(false); // Set loading to false after data is fetched
         }
-      };
+    };
     const openModal = (quest) => {
         setSelectedQuest(quest);
         setIsModalOpen(true);
@@ -88,18 +89,18 @@ function Earn() {
     const handleClaimReward = async () => {
         const today = new Date().setHours(0, 0, 0, 0); // Normalize today's date
         const userRef = doc(db, 'users', uid);
-    
+
         let { currentDay, lastLogin, rewardsClaimed } = dailyLoginData;
-    
+
         // Normalize last login date
         const lastLoginDate = lastLogin ? new Date(lastLogin).setHours(0, 0, 0, 0) : null;
-    
+
         // Check if reward has already been claimed today
         if (lastLoginDate === today) {
             alert("You've already claimed today's reward.");
             return;
         }
-    
+
         // Reset streak if the last login was not yesterday
         if (lastLoginDate && (today - lastLoginDate) / (1000 * 60 * 60 * 24) > 1) {
             currentDay = 1;
@@ -112,11 +113,11 @@ function Earn() {
                 currentDay = 1;
             }
         }
-    
+
         const rewardAmount = Math.min(currentDay * 50, 2500);
         rewardsClaimed.push(currentDay);
         const newPetals = Number(petals) + rewardAmount; // Convert petals to number before adding
-    
+
         // Update state
         setPetals(newPetals);
         setDailyLoginData({
@@ -125,13 +126,13 @@ function Earn() {
             rewardsClaimed
         });
         setIsDailyLoginModalOpen(false);
-    
+
         // Update Firestore
         await updateDoc(userRef, {
             petals: newPetals,
             dailyLoginData: { currentDay, lastLogin: new Date().toISOString(), rewardsClaimed }
         });
-    
+
         // Save to local storage
         localStorage.setItem('dailyLoginData', JSON.stringify({
             currentDay,
@@ -139,7 +140,7 @@ function Earn() {
             rewardsClaimed
         }));
     };
-    
+
 
     const handleConfirmClick = () => {
         if (buttonText === 'Confirm') {
@@ -166,7 +167,7 @@ function Earn() {
             const questId = selectedQuest.id
             const questDocRef = doc(db, 'quests', questId);
             const rewardAmount = Number(selectedQuest.reward);
-        const newPetals = Number(petals) + rewardAmount;
+            const newPetals = Number(petals) + rewardAmount;
             setPetals(newPetals);
 
             await updateDoc(doc(db, 'users', uid), { petals: newPetals });
@@ -187,12 +188,11 @@ function Earn() {
     return (
         <div className="min-h-screen px-4 flex flex-col text-white font-medium items-center bg-[#1f1f1f]">
 
-            <div className="absolute inset-0 h-1/2 bg-gradient-overlay z-0"></div>
-            <div className="absolute inset-0 flex items-center justify-center z-0">
-                <div className="radial-gradient-overlay"></div>
-            </div>
-
             <div className="w-full z-10 min-h-screen flex flex-col text-white items-center">
+            <Link to="/">
+                <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
+
+            </Link>
                 <div className="mt-12 text-5xl font-bold flex items-center">
                     <img src={coin} width={44} height={44} />
                     <span className="ml-2">{petals.toLocaleString()}</span>
@@ -263,46 +263,46 @@ function Earn() {
 
                     {isDailyLoginModalOpen && (
                         <div className="min-w-screen h-screen animated fadeIn faster fixed left-0 top-0 flex justify-center items-center inset-0 z-50 outline-none focus:outline-none bg-no-repeat bg-center bg-cover">
-                        <div className="absolute bg-black opacity-80 inset-0 z-0"></div>
-                        <div className="w-full max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg bg-white max-h-screen overflow-y-auto">
-                            <div className="text-center p-5 flex-auto justify-center">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsDailyLoginModalOpen(false)}
-                                    className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center"
-                                >
-                                    <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l12 12M13 1 1 13" />
-                                    </svg>
-                                    <span className="sr-only">Close modal</span>
-                                </button>
-                                <h2 className="text-xl font-bold py-4 text-gray-500">Daily Login Rewards</h2>
-                                <p>Day {dailyLoginData.currentDay}</p>
-                                <p className="text-lg font-medium">Reward: {Math.min(dailyLoginData.currentDay * 50, 2500)} petals</p>
-                                <div className="grid grid-cols-5 gap-4">
-                                    {Array.from({ length: 50 }).map((_, index) => (
-                                        <div
-                                            key={index}
-                                            className={`p-2 text-center rounded-lg text-black ${index < dailyLoginData.currentDay - 1 ? 'bg-green-200' : 'bg-gray-100'}`}
-                                        >
-                                            {index + 1}
-                                            {dailyLoginData.rewardsClaimed.includes(index + 1) && (
-                                                <span className="text-green-500 ml-2">&#10003;</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="text-center pt-4">
+                            <div className="absolute bg-black opacity-80 inset-0 z-0"></div>
+                            <div className="w-full max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg bg-white max-h-screen overflow-y-auto">
+                                <div className="text-center p-5 flex-auto justify-center">
                                     <button
-                                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mt-4"
-                                        onClick={handleClaimReward}
+                                        type="button"
+                                        onClick={() => setIsDailyLoginModalOpen(false)}
+                                        className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center"
                                     >
-                                        Claim Reward
+                                        <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l12 12M13 1 1 13" />
+                                        </svg>
+                                        <span className="sr-only">Close modal</span>
                                     </button>
+                                    <h2 className="text-xl font-bold py-4 text-gray-500">Daily Login Rewards</h2>
+                                    <p>Day {dailyLoginData.currentDay}</p>
+                                    <p className="text-lg font-medium">Reward: {Math.min(dailyLoginData.currentDay * 50, 2500)} petals</p>
+                                    <div className="grid grid-cols-5 gap-4">
+                                        {Array.from({ length: 50 }).map((_, index) => (
+                                            <div
+                                                key={index}
+                                                className={`p-2 text-center rounded-lg text-black ${index < dailyLoginData.currentDay - 1 ? 'bg-green-200' : 'bg-gray-100'}`}
+                                            >
+                                                {index + 1}
+                                                {dailyLoginData.rewardsClaimed.includes(index + 1) && (
+                                                    <span className="text-green-500 ml-2">&#10003;</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="text-center pt-4">
+                                        <button
+                                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mt-4"
+                                            onClick={handleClaimReward}
+                                        >
+                                            Claim Reward
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>                    
                     )}
                 </div>
 

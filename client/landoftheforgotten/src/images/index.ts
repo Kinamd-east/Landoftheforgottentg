@@ -6,6 +6,7 @@ import skeleton3 from './skeleton3.png'
 import skeleton4 from './skeleton4.png'
 import skeleton5 from './skeleton5.png'
 import skeleton6 from './skeleton6.png'
+import Arrow from './left-arrow.png';
 import skeleton7 from './skeleton7.png'
 import skeleton8 from './skeleton8.png'
 import scare from './scary.jpg'
@@ -29,6 +30,7 @@ export {
     back3,
     back2,
     skeleton2,
+    Arrow,
     skeleton3,
     skeleton4,
     skeleton5,

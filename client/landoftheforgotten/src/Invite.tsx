@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
 import LoadingPage from './LoadingPage';
+import { Link } from 'react-router-dom';
 import { db } from './firebase';
-import { background, back2, back3, coin } from './images';
+import { background, back2, back3, coin, Arrow } from './images';
 
 
 const generateUID = () => {
@@ -140,6 +141,10 @@ const InvitePage = () => {
   return (
     <div className="min-h-screen px-4 flex flex-col text-white font-medium items-center bg-[#1f1f1f]">
       <div className="w-full z-10 min-h-screen flex flex-col text-white items-center">
+      <Link to="/">
+          <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
+
+        </Link>
         <div className="mt-12 text-5xl font-bold flex items-center">
           <img src={coin} width={44} height={44} />
           <span className="ml-2">{petals.toLocaleString()}</span>
