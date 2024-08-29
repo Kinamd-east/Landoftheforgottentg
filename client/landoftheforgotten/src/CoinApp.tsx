@@ -3,9 +3,8 @@ import { db } from './firebase';
 import { Link } from 'react-router-dom';
 import LoadingPage from './LoadingPage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import Arrow from './icons/Arrow';
 import { bear, coin, highVoltage, rocket, trophy, skeleton, heart, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8, background2 } from './images';
-import { background, back2, back3 } from './images';
+import { back3 } from './images';
 
 const generateUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -41,7 +40,7 @@ const CoinApp = () => {
   const [energyUpgradePrice, setEnergyUpgradePrice] = useState(1000);
   const [uid, setUid] = useState(localStorage.getItem('uid') || generateUID());
   const [tapPosition, setTapPosition] = useState(null);
-  const [increments, setIncrements] = useState([]);
+  const [increments, setIncrements]= useState([]);
   const [tapEffect, setTapEffect] = useState(false);
   const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
@@ -208,7 +207,7 @@ triggerBannerSlideIn(); // This triggers the banner animation after 5 seconds
       <div className="fixed top-0 left-0 w-full px-4 pt-8 z-10 flex flex-col items-center text-white">
         <div className="w-full cursor-pointer">
           <div className="bg-[#1f1f1f] text-center py-2 rounded-xl">
-            <p className="text-lg">Join squad <Arrow size={18} className="ml-0 mb-1 inline-block" /></p>
+            <p className="text-lg">Join squad</p>
           </div>
         </div>
         <div className="mt-12 text-5xl font-bold flex items-center">

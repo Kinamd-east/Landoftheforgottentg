@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { scare } from './images'
+import { useState } from 'react';
+import { scare } from './images';
 
 function LoadingPage() {
   const dotDiv = document.getElementById('dot-div')
