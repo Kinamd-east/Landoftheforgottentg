@@ -86,13 +86,6 @@ const InvitePage = () => {
   }, [location.search, uid]);
 
   useEffect(() => {
-    window.Telegram.WebApp.BackButton.isVisible = 'true'
-  }, [])
-  
-
-
-
-  useEffect(() => {
     if (uid) {
       const link = `${window.location.origin}/invites?referrerId=${uid}`;
       setInviteLink(link);
@@ -175,10 +168,8 @@ const InvitePage = () => {
               />
             </div>
             <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={() => {
-              WebApp.openTelegramLink(
-                `${inviteLink}`
-              );
-            }}>Invite Friend</button>
+              handleCopyLink(inviteLink)
+            }}>Copy Link</button>
             </div>
           </div>
           <h2 className="text-2xl mb-4">Invited Users:</h2>
