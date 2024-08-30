@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import WebApp from '@twa-dev/sdk'
 import { doc, getDoc, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
 import LoadingPage from './LoadingPage';
 import { Link } from 'react-router-dom';
@@ -38,39 +39,39 @@ const InvitePage = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const referrerId = params.get('referrerId'); // Get referrerId from URL params
-  
+
     const handleReferral = async () => {
       if (referrerId && referrerId !== uid) {
         const referrerRef = doc(db, 'users', referrerId);
-  
+
         try {
           const referrerSnap = await getDoc(referrerRef);
-  
+
           if (!referrerSnap.exists()) {
             console.error('Referrer document does not exist!');
             return;
           }
-  
+
           const referrerData = referrerSnap.data();
           const newInvitedUsers = referrerData.invitedUsers || [];
           const currentPetals = parseInt(referrerData.petals) || 0;
-  
+
           console.log('Referrer Data:', referrerData);
           console.log('Current Invited Users:', newInvitedUsers);
           console.log('Current Petals:', currentPetals);
-  
+
           // Check if the user is already in the invitedUsers array
           if (!newInvitedUsers.includes(uid)) {
             console.log('User not in invitedUsers, adding and rewarding petals.');
-  
+
             newInvitedUsers.push(uid);
-  
+
             // Update the referrer's document with the new user's ID and increment petals
             await updateDoc(referrerRef, {
               invitedUsers: newInvitedUsers,
               petals: currentPetals + 100, // Increment petals by 100
             });
-  
+
             console.log('Update succeeded: User added and petals rewarded.');
           } else {
             console.log('User is already in the invitedUsers array.');
@@ -80,10 +81,15 @@ const InvitePage = () => {
         }
       }
     };
-  
+
     handleReferral();
   }, [location.search, uid]);
+
+  useEffect(() => {
+    window.Telegram.WebApp.BackButton.isVisible = 'true'
+  }, [])
   
+
 
 
   useEffect(() => {
@@ -135,13 +141,18 @@ const InvitePage = () => {
       console.error('Error loading invited users:', error);
     }
   };
+  const handleCopyLink = (value) => {
+    navigator.clipboard.writeText(value)
+    alert('Link copied to clipboard')
+
+  }
   if (loading) return <LoadingPage />; // Show loading indicator
 
 
   return (
     <div className="min-h-screen px-4 flex flex-col text-white font-medium items-center bg-[#1f1f1f]">
       <div className="w-full z-10 min-h-screen flex flex-col text-white items-center">
-      <Link to="/">
+        <Link to="/">
           <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
 
         </Link>
@@ -160,7 +171,14 @@ const InvitePage = () => {
                 readOnly
                 value={inviteLink}
                 className="px-4 py-2 bg-gray-800 text-white rounded-lg w-80 mb-4"
+                onClick={() => handleCopyLink(inviteLink)}
               />
+            </div>
+            <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={() => {
+              WebApp.openTelegramLink(
+                `${inviteLink}`
+              );
+            }}>Invite Friend</button>
             </div>
           </div>
           <h2 className="text-2xl mb-4">Invited Users:</h2>

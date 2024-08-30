@@ -83,6 +83,7 @@ const CoinApp = () => {
     };
 
     initializeUser();
+    window.Telegram.WebAPp
   }, [uid]);
 
   useEffect(() => {

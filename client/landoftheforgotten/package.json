@@ -12,6 +12,7 @@
   "dependencies": {
     "@ton/ton": "^15.0.0",
     "@tonconnect/ui-react": "^2.0.9",
+    "@twa-dev/sdk": "^7.8.0",
     "@types/uuid": "^10.0.0",
     "axios": "^1.7.2",
     "buffer": "^6.0.3",

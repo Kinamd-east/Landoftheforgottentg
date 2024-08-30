@@ -18,7 +18,7 @@ function LoadingPage() {
       anotherDotDiv?.append(anotherDiv)
     }
     else if(loading == 100) {
-      console.error('Network error')
+      window.location.reload()
     }
   }, 1000);
   // useEffect(() => {
