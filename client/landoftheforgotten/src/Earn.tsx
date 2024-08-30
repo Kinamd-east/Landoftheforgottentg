@@ -77,7 +77,7 @@ function Earn() {
         } catch (error) {
             console.error('Error loading user data:', error);
         } finally {
-            setLoading(false); // Set loading to false after data is fetched
+            setLoadingPage(false); // Set loading to false after data is fetched
         }
     };
     const openModal = (quest) => {
@@ -87,31 +87,34 @@ function Earn() {
 
 
     const handleClaimReward = async () => {
-        const today = new Date().setHours(0, 0, 0, 0); // Normalize today's date
+        const today = new Date().setHours(0, 0, 0, 0); // Normalize today's date to midnight
         const userRef = doc(db, 'users', uid);
 
         let { currentDay, lastLogin, rewardsClaimed } = dailyLoginData;
 
-        // Normalize last login date
+        // Normalize last login date if it exists
         const lastLoginDate = lastLogin ? new Date(lastLogin).setHours(0, 0, 0, 0) : null;
 
         // Check if reward has already been claimed today
-        if (lastLoginDate === today) {
+        if (lastLoginDate && lastLoginDate === today) {
             alert("You've already claimed today's reward.");
             return;
         }
 
-        // Reset streak if the last login was not yesterday
-        if (lastLoginDate && (today - lastLoginDate) / (1000 * 60 * 60 * 24) > 1) {
+        // Check if the last login was yesterday
+        const isNextDay = lastLoginDate && (today - lastLoginDate) === 24 * 60 * 60 * 1000;
+
+        // Reset streak if last login was more than 1 day ago
+        if (lastLoginDate && !isNextDay) {
             currentDay = 1;
             rewardsClaimed = [];
+        } else if (isNextDay) {
+            // Increment streak if last login was yesterday
+            currentDay = currentDay < 50 ? currentDay + 1 : 1;
         } else {
-            // Otherwise, increment the streak
-            if (currentDay < 50) {
-                currentDay++;
-            } else {
-                currentDay = 1;
-            }
+            // Handle first login or if lastLoginDate is null
+            currentDay = 1;
+            rewardsClaimed = [];
         }
 
         const rewardAmount = Math.min(currentDay * 50, 2500);
@@ -140,6 +143,7 @@ function Earn() {
             rewardsClaimed
         }));
     };
+
 
 
     const handleConfirmClick = () => {
@@ -183,16 +187,44 @@ function Earn() {
 
     };
 
+    const handleFreeClick = (num) => {
+        const firstDiv = document.getElementById('firstBoost');
+        const secondDiv = document.getElementById('secondBoost');
+        const firstText = document.getElementById('firstBoostDiv');
+        const secondText = document.getElementById('secondBoostDiv');
+
+        if (num === 1) {
+            // Show first div and hide second div
+            firstDiv?.classList.remove('hidden');
+            secondDiv?.classList.add('hidden');
+
+            // Add active class to first text and remove from second text
+            firstText?.classList.add('active');
+            secondText?.classList.remove('active');
+
+            console.log('Free clicked 1');
+        } else if (num === 2) {
+            // Show second div and hide first div
+            secondDiv?.classList.remove('hidden');
+            firstDiv?.classList.add('hidden');
+
+            // Add active class to second text and remove from first text
+            secondText?.classList.add('active');
+            firstText?.classList.remove('active');
+
+            console.log('Free clicked 2');
+        }
+    };
     if (loadingPage) return <LoadingPage />; // Show loading indicator
 
     return (
         <div className="min-h-screen px-4 flex flex-col text-white font-medium items-center bg-[#1f1f1f]">
 
             <div className="w-full z-10 min-h-screen flex flex-col text-white items-center">
-            <Link to="/">
-                <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
+                <Link to="/">
+                    <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
 
-            </Link>
+                </Link>
                 <div className="mt-12 text-5xl font-bold flex items-center">
                     <img src={coin} width={44} height={44} />
                     <span className="ml-2">{petals.toLocaleString()}</span>
@@ -200,33 +232,32 @@ function Earn() {
                 <h1 className='mt-10 text-4xl'>Earn more</h1>
 
                 <div className="top-0 left-0 px-4 pt-8 z-10 flex flex-col text-white">
-                    <div className='mt-10'>
-                        <h1 className='m-4 text-xl'>Daily</h1>
-                        <div className='mb-10'>
-                            <button
-                                className="text-center relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-2xl font-medium text-white rounded-lg group max-"
-                                onClick={() => setIsDailyLoginModalOpen(true)}
-                            >
-                                <span className="h-20 relative px-5 py-2.5 transition-all ease-in duration-100 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                                    Daily Login
-                                </span>
-                            </button>
+                    <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400 m-4">
+                        <li className="me-2">
+                            <a href="#" className="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white" onClick={() => handleFreeClick(1)} aria-current="page">Daily task</a>
+                        </li>
+                        <li className="me-2">
+                            <a href="#" className="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white" onClick={() => handleFreeClick(2)}>Social tasks</a>
+                        </li>
+                    </ul>
+                    <div className='mt-10' id='firstBoost'>
+                        <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={() => setIsDailyLoginModalOpen(true)}>Daily Login</button>
                         </div>
                     </div>
-                    <div className='free-boost mt-10'>
-                        <h1 className='m-4 text-xl'>Social tasks</h1>
-                        {quests.map(quest => (
-                            <div className='mb-10' key={quest.id}>
-                                <button
-                                    className="text-center relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-2xl font-medium text-gray-900 rounded-lg group"
-                                    onClick={() => openModal(quest)}
-                                >
-                                    <span className="h-20 relative px-5 py-2.5 transition-all ease-in duration-100 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                                        {quest.title} - {quest.reward}
-                                    </span>
-                                </button>
+                    <div className='free-boost mt-10 hidden' id='secondBoost'>
+                        {/* <h1 className='m-4 text-xl'>Social tasks</h1> */}
+                        {quests && quests.length === 0 ? (
+                            <div className="text-center text-xl text-gray-600">
+                                No quests available
                             </div>
-                        ))}
+                        ) : (
+                            quests && quests.map(quest => (
+                                <div className='mb-10' key={quest.id}> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={() => openModal(quest)}>{quest.title} - {quest.reward}</button>
+                                </div>
+                            ))
+                        )}
+
+
                     </div>
 
                     {isModalOpen && (

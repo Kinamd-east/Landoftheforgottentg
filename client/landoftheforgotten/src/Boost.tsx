@@ -16,11 +16,21 @@ const generateUID = () => {
   });
 };
 
+const getStoredValue = (key, defaultValue) => {
+  const storedValue = localStorage.getItem(key);
+  return storedValue !== null ? JSON.parse(storedValue) : defaultValue;
+};
 function Boost() {
   const [petals, setPetals] = useState(0);
   const [boostLevel, setBoostLevel] = useState(0);
   const [loading, setLoading] = useState(true); // Loading state
   const [boostPrice, setBoostPrice] = useState(1000);
+  const [freeBoostsUsed, setFreeBoostsUsed] = useState(0);
+  const [freeTapBoostsUsed, setFreeTapBoostsUsed] = useState(0);
+  const [tapBoostCooldown, setTapBoostCooldown] = useState(false);
+  const [tapPoints, setTapPoints] = useState(1);
+  const [isTapBoostActive, setIsTapBoostActive] = useState(false);
+  const [isCooldown, setIsCooldown] = useState(false);
   const [health, setHealth] = useState(1000000);
   const [maxHealth, setMaxHealth] = useState(1000000);
   const [planDuration, setPlanDuration] = useState(7); // Default to 7 days
@@ -36,6 +46,51 @@ function Boost() {
   const [tapEffect, setTapEffect] = useState(false);
   const [clicks, setClicks] = useState([]);
   const connected = useTonWallet()
+
+
+  useEffect(() => {
+    // Check if cooldown has expired
+    const storedTapBoostsUsed = parseInt(localStorage.getItem('freeTapBoostsUsed')) || 0;
+    setFreeTapBoostsUsed(storedTapBoostsUsed);
+    const lastBoostTime = parseInt(localStorage.getItem('lastTapBoostTime'));
+    if (lastBoostTime) {
+      const currentTime = Date.now();
+      const timeDifference = currentTime - lastBoostTime;
+      const boostCooldown = 24 * 60 * 60 * 1000; // 24 hours
+
+      if (timeDifference < boostCooldown) {
+        setTapBoostCooldown(true);
+      } else {
+        // Reset boosts if cooldown period is over
+        setFreeTapBoostsUsed(0);
+        localStorage.setItem('freeTapBoostsUsed', '0');
+        setTapBoostCooldown(false);
+      }
+
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedBoostsUsed = parseInt(localStorage.getItem('freeBoostsUsed')) || 0;
+    setFreeBoostsUsed(storedBoostsUsed);
+
+    const lastBoostTime = parseInt(localStorage.getItem('lastBoostTime'));
+    if (lastBoostTime) {
+      const currentTime = Date.now();
+      const timeDifference = currentTime - lastBoostTime;
+      const boostCooldown = 24 * 60 * 60 * 1000; // 24 hours
+
+      if (timeDifference < boostCooldown) {
+        setIsCooldown(true);
+      } else {
+        // Reset boosts if cooldown period is over
+        setFreeBoostsUsed(0);
+        localStorage.setItem('freeBoostsUsed', '0');
+        setIsCooldown(false);
+      }
+    }
+  }, []);
+
 
   useEffect(() => {
     localStorage.setItem('uid', uid);
@@ -96,10 +151,11 @@ function Boost() {
       setBoostLevel(newBoostLevel);
       setBoostPrice(newBoostPrice);
       setPetals(newPetals);
+      alert('Successfully upgraded your tapping power')
 
       await updateDoc(doc(db, 'users', uid), { boostLevel: newBoostLevel, boostPrice: newBoostPrice, petals: newPetals });
     } else {
-      alert('Not enough petals to buy a boost!');
+      alert('Not enough petals to buy a tapping boost!');
     }
   };
 
@@ -113,6 +169,7 @@ function Boost() {
       setEnergy(newMaxEnergy);
       setEnergyUpgradePrice(newEnergyUpgradePrice);
       setPetals(newPetals);
+      alert('Successfully upgraded your energy')
 
       await updateDoc(doc(db, 'users', uid), { maxEnergy: newMaxEnergy, energy: newMaxEnergy, energyUpgradePrice: newEnergyUpgradePrice, petals: newPetals });
     } else {
@@ -126,6 +183,41 @@ function Boost() {
       setIsPlanActive(true);
     }
   }, []);
+
+  const handleFreeBoost = async () => {
+    if (isCooldown) {
+      alert('You have used all your free boosts. Please wait 24 hours before using it again.');
+      return;
+    }
+
+    if (freeBoostsUsed >= 3) {
+      const currentTime = Date.now();
+      localStorage.setItem('lastBoostTime', currentTime.toString());
+      setIsCooldown(true);
+      alert('You have used all your free boosts. Please wait 24 hours before using it again.');
+      return;
+    }
+
+    // Perform the energy upgrade without paying petals
+    if (energy < maxEnergy) {
+      const diff = maxEnergy - energy;
+      const newEnergy = energy + diff;
+
+      // Immediately update the boost count before proceeding
+      const updatedFreeBoostsUsed = freeBoostsUsed + 1;
+      setFreeBoostsUsed(updatedFreeBoostsUsed);
+      localStorage.setItem('freeBoostsUsed', updatedFreeBoostsUsed.toString());
+
+      // Update energy
+      setEnergy(newEnergy);
+      await updateDoc(doc(db, 'users', uid), { energy: newEnergy });
+
+      alert('Successfully upgraded your energy with a free boost!');
+    } else {
+      alert('Your energy is already at maximum!');
+    }
+  };
+
 
   const handleFirstShieldPotion = async (duration) => {
     // Add first shield potion logic here
@@ -208,6 +300,83 @@ function Boost() {
       }
     }
   }
+  const handleFreeClick = (num) => {
+    const firstDiv = document.getElementById('firstBoost');
+    const secondDiv = document.getElementById('secondBoost');
+    const firstText = document.getElementById('firstBoostDiv');
+    const secondText = document.getElementById('secondBoostDiv');
+  
+    if (num === 1) {
+      // Show first div and hide second div
+      firstDiv?.classList.remove('hidden');
+      secondDiv?.classList.add('hidden');
+  
+      // Add active class to first text and remove from second text
+      firstText?.classList.add('active');
+      secondText?.classList.remove('active');
+  
+      console.log('Free clicked 1');
+    } else if (num === 2) {
+      // Show second div and hide first div
+      secondDiv?.classList.remove('hidden');
+      firstDiv?.classList.add('hidden');
+  
+      // Add active class to second text and remove from first text
+      secondText?.classList.add('active');
+      firstText?.classList.remove('active');
+  
+      console.log('Free clicked 2');
+    }
+  };
+
+  const activateTapBoost = async() => {
+    const originalBoostLevel = boostLevel;
+    if (tapBoostCooldown) {
+      alert('You have used all your free tapping boosts. Please wait 24 hours before using it again.');
+      return;
+    }
+
+    if (freeTapBoostsUsed >= 3) {
+      const currentTime = Date.now();
+      localStorage.setItem('lastTapBoostTime', currentTime.toString());
+      setTapBoostCooldown(true);
+      // setIsTapBoostActive(true)
+      alert('You have used all your free tapping boosts. Please wait 24 hours before using it again.');
+      return;
+    }
+
+    if(!isTapBoostActive) {
+      const updatedFreeTapBoostsUsed = freeTapBoostsUsed + 1;
+
+    let newBoostLevel;
+    if (boostLevel === 0) {
+      newBoostLevel = 10;
+    } else {
+      newBoostLevel = boostLevel * 10;
+    }
+
+    console.log(`Boost level before activation: ${boostLevel}`);
+    setBoostLevel(newBoostLevel);
+    setIsTapBoostActive(true);
+    setFreeTapBoostsUsed(updatedFreeTapBoostsUsed);
+    localStorage.setItem('freeTapBoostsUsed', updatedFreeTapBoostsUsed.toString());
+    alert("Tap Boost active")
+    await updateDoc(doc(db, 'users', uid), { boostLevel: newBoostLevel });
+
+    console.log(`Boost level after activation: ${newBoostLevel}`);
+    setTimeout(async () => {
+      console.log('Tap boost time is up.');
+      setIsTapBoostActive(false);
+      setBoostLevel(originalBoostLevel);
+      await updateDoc(doc(db, 'users', uid), { boostLevel: originalBoostLevel });
+      console.log('Tap boost has ended, boost level reverted to 0', originalBoostLevel);
+      window.location.reload()
+    }, 10000);
+    } else {
+      alert("You already have an active boost")
+    }
+    
+  };
 
 
   if (loading) return <LoadingPage />; // Show loading indicator
@@ -232,7 +401,23 @@ function Boost() {
             <span className="ml-2">{petals.toLocaleString()}</span>
           </div>
           <h1 className='mt-10 text-2xl'>BOOSTS!!!</h1>
-          <div className='free-boost mt-10'>
+
+
+          <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400 m-4">
+            <li className="me-2">
+              <a href="#" className="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white" onClick={() => handleFreeClick(1)} aria-current="page" id='firstBoostDiv'>Free Boost</a>
+            </li>
+            <li className="me-2">
+              <a href="#" className="inline-block px-4 py-3 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white" onClick={() => handleFreeClick(2)} id='secondBoostDiv'>Paid Boost</a>
+            </li>
+          </ul>
+          <div className='free-boost mt-10' id='firstBoost'>
+            <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={handleFreeBoost}>Free Energy Boost</button>
+            </div>
+            <div className=' mb-10'><button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={activateTapBoost}>Free Taps Boost
+            </button></div>
+          </div>
+          <div className='free-boost mt-10 hidden' id='secondBoost'>
             <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={handleEnergyUpgrade}>Buy Energy - {energyUpgradePrice}</button>
             </div>
             <div className=' mb-10'><button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={handleBoost}>Buy Taps - {boostPrice}

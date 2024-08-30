@@ -149,3 +149,9 @@
   font-family: 'Courier New', Courier, monospace;
   animation: spin 1s linear infinite;
 }
+
+.activeDiv {
+  --tw-bg-opacity: 1;
+  background-color: rgb(75 85 99 / var(--tw-bg-opacity)) /* #4b5563 */;
+  color: white;
+}
