@@ -33,6 +33,7 @@ const InvitePage = () => {
   const [clicks, setClicks] = useState([]);
   const [quests, setQuests] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dailyLoginData, setDailyLoginData] = useState({ currentDay: 0, lastLogin: null, rewardsClaimed: [] });
   const [selectedQuest, setSelectedQuest] = useState(null);
   const [petals, setPetals] = useState(0);
   const [invitedUsers, setInvitedUsers] = useState([]);
@@ -101,28 +102,32 @@ const InvitePage = () => {
 
   const loadUserData = async (uid) => {
     try {
-      const userRef = doc(db, 'users', uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        setPetals(userData.petals);
-        setBoostLevel(userData.boostLevel);
-        setBoostPrice(userData.boostPrice);
-        setHealth(userData.health);
-        setMaxHealth(userData.maxHealth);
-        setEnergy(userData.energy);
-        setMaxEnergy(userData.maxEnergy);
-        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
-        setEnergyUpgradePrice(userData.energyUpgradePrice);
-      } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
-      }
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setPetals(userData.petals);
+            setBoostLevel(userData.boostLevel);
+            setBoostPrice(userData.boostPrice);
+            setHealth(userData.health);
+            setMaxHealth(userData.maxHealth);
+            setEnergy(userData.energy);
+            setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
+            setMaxEnergy(userData.maxEnergy);
+            setEnergyUpgradePrice(userData.energyUpgradePrice);
+            setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
+        } else {
+            const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] }};
+            await setDoc(userRef, defaultData);
+            setDailyLoginData(defaultData.dailyLoginData);
+        }
     } catch (error) {
-      console.error('Error loading user data:', error);
+        console.error('Error loading user data:', error);
     } finally {
-      setLoading(false); // Set loading to false after data is fetched
+        setLoading(false); // Set loading to false after data is fetched
     }
-  };
+};
+
 
   const loadInvitedUsers = async (uid) => {
     try {

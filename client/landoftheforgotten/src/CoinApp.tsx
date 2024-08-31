@@ -46,6 +46,7 @@ const CoinApp = () => {
   const [completedQuests, setCompletedQuests] = useState([]);
   const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
+  const [dailyLoginData, setDailyLoginData] = useState({ currentDay: 0, lastLogin: null, rewardsClaimed: [] });
   const [currentImage, setImage] = useState(skeleton); // Initial image
   const [showVictoryModal, setShowVictoryModal] = useState(false); // New state for modal
 
@@ -107,30 +108,33 @@ const CoinApp = () => {
   }, [energy, health, maxEnergy, maxHealth, uid]);
 
   const loadUserData = async (uid) => {
-    console.log(isPlanActive)
     try {
-      const userRef = doc(db, 'users', uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        setPetals(userData.petals);
-        setBoostLevel(userData.boostLevel);
-        setBoostPrice(userData.boostPrice);
-        setHealth(userData.health);
-        setMaxHealth(userData.maxHealth);
-        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
-        setEnergy(userData.energy);
-        setMaxEnergy(userData.maxEnergy);
-        setEnergyUpgradePrice(userData.energyUpgradePrice);
-      } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
-      }
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setPetals(userData.petals);
+            setBoostLevel(userData.boostLevel);
+            setBoostPrice(userData.boostPrice);
+            setHealth(userData.health);
+            setMaxHealth(userData.maxHealth);
+            setEnergy(userData.energy);
+            setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
+            setMaxEnergy(userData.maxEnergy);
+            setEnergyUpgradePrice(userData.energyUpgradePrice);
+            setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
+        } else {
+            const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] }};
+            await setDoc(userRef, defaultData);
+            setDailyLoginData(defaultData.dailyLoginData);
+        }
     } catch (error) {
-      console.error('Error loading user data:', error);
+        console.error('Error loading user data:', error);
     } finally {
-      setLoading(false); // Set loading to false after data is fetched
+        setLoading(false); // Set loading to false after data is fetched
     }
-  };
+};
+
 
 
   const handleTap = async (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

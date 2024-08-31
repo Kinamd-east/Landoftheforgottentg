@@ -44,6 +44,7 @@ function Boost() {
   const [uid, setUid] = useState(localStorage.getItem('uid') || generateUID());
   const [tapPosition, setTapPosition] = useState(null);
   const [increments, setIncrements] = useState([]);
+  const [dailyLoginData, setDailyLoginData] = useState({ currentDay: 0, lastLogin: null, rewardsClaimed: [] });
   const [tapEffect, setTapEffect] = useState(false);
   const [clicks, setClicks] = useState([]);
   const connected = useTonWallet()
@@ -120,28 +121,32 @@ function Boost() {
 
   const loadUserData = async (uid) => {
     try {
-      const userRef = doc(db, 'users', uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        setPetals(userData.petals);
-        setBoostLevel(userData.boostLevel);
-        setBoostPrice(userData.boostPrice);
-        setHealth(userData.health);
-        setMaxHealth(userData.maxHealth);
-        setEnergy(userData.energy);
-        setMaxEnergy(userData.maxEnergy);
-        setEnergyUpgradePrice(userData.energyUpgradePrice);
-        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
-      } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
-      }
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setPetals(userData.petals);
+            setBoostLevel(userData.boostLevel);
+            setBoostPrice(userData.boostPrice);
+            setHealth(userData.health);
+            setMaxHealth(userData.maxHealth);
+            setEnergy(userData.energy);
+            setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
+            setMaxEnergy(userData.maxEnergy);
+            setEnergyUpgradePrice(userData.energyUpgradePrice);
+            setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
+        } else {
+            const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] }};
+            await setDoc(userRef, defaultData);
+            setDailyLoginData(defaultData.dailyLoginData);
+        }
     } catch (error) {
-      console.error('Error loading user data:', error);
+        console.error('Error loading user data:', error);
     } finally {
-      setLoading(false); // Set loading to false after data is fetched
+        setLoadingPage(false); // Set loading to false after data is fetched
     }
-  };
+};
+
 
 
   const handleBoost = async () => {
@@ -414,9 +419,9 @@ function Boost() {
             </li>
           </ul>
           <div className='free-boost mt-10' id='firstBoost'>
-            <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={handleFreeBoost}>Free Energy Boost</button>
+            <div className='mb-10'> <button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={handleFreeBoost}>Free Energy Boost (3 uses)</button>
             </div>
-            <div className=' mb-10'><button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={activateTapBoost}>Free Taps Boost
+            <div className=' mb-10'><button type="button" className="mb-2 me-2 w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700" onClick={activateTapBoost}>Free Taps Boost (3 uses)
             </button></div>
           </div>
           <div className='free-boost mt-10 hidden' id='secondBoost'>

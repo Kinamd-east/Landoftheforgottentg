@@ -91,8 +91,11 @@ function Earn() {
                 setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
                 setMaxEnergy(userData.maxEnergy);
                 setEnergyUpgradePrice(userData.energyUpgradePrice);
+                setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
             } else {
-                await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
+                const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] }};
+                await setDoc(userRef, defaultData);
+                setDailyLoginData(defaultData.dailyLoginData);
             }
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -100,6 +103,7 @@ function Earn() {
             setLoadingPage(false); // Set loading to false after data is fetched
         }
     };
+    
     const openModal = (quest) => {
         setSelectedQuest(quest);
         setIsModalOpen(true);
@@ -109,21 +113,21 @@ function Earn() {
     const handleClaimReward = async () => {
         const today = new Date().setHours(0, 0, 0, 0); // Normalize today's date to midnight
         const userRef = doc(db, 'users', uid);
-
+    
         let { currentDay, lastLogin, rewardsClaimed } = dailyLoginData;
-
+    
         // Normalize last login date if it exists
         const lastLoginDate = lastLogin ? new Date(lastLogin).setHours(0, 0, 0, 0) : null;
-
+    
         // Check if reward has already been claimed today
         if (lastLoginDate && lastLoginDate === today) {
             alert("You've already claimed today's reward.");
             return;
         }
-
+    
         // Check if the last login was yesterday
         const isNextDay = lastLoginDate && (today - lastLoginDate) === 24 * 60 * 60 * 1000;
-
+    
         // Reset streak if last login was more than 1 day ago
         if (lastLoginDate && !isNextDay) {
             currentDay = 1;
@@ -136,11 +140,11 @@ function Earn() {
             currentDay = 1;
             rewardsClaimed = [];
         }
-
+    
         const rewardAmount = Math.min(currentDay * 50, 2500);
         rewardsClaimed.push(currentDay);
         const newPetals = Number(petals) + rewardAmount; // Convert petals to number before adding
-
+    
         // Update state
         setPetals(newPetals);
         setDailyLoginData({
@@ -149,13 +153,14 @@ function Earn() {
             rewardsClaimed
         });
         setIsDailyLoginModalOpen(false);
-
+        alert("Login successful!");
+    
         // Update Firestore
         await updateDoc(userRef, {
             petals: newPetals,
             dailyLoginData: { currentDay, lastLogin: new Date().toISOString(), rewardsClaimed }
         });
-
+    
         // Save to local storage
         localStorage.setItem('dailyLoginData', JSON.stringify({
             currentDay,
@@ -163,6 +168,7 @@ function Earn() {
             rewardsClaimed
         }));
     };
+    
 
 
 
