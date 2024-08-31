@@ -143,7 +143,7 @@ function Boost() {
     } catch (error) {
         console.error('Error loading user data:', error);
     } finally {
-        setLoadingPage(false); // Set loading to false after data is fetched
+        setLoading(false); // Set loading to false after data is fetched
     }
 };
 
