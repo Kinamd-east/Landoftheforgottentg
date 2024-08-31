@@ -18,6 +18,7 @@ function Earn() {
     const [buttonText, setButtonText] = useState('Confirm');
     const [loading, setLoading] = useState(false);
     const [loadingPage, setLoadingPage] = useState(true)
+    const [completedQuests, setCompletedQuests] = useState([]);
     const [boostLevel, setBoostLevel] = useState(0);
     const [boostPrice, setBoostPrice] = useState(1000);
     const [health, setHealth] = useState(1000000);
@@ -57,6 +58,24 @@ function Earn() {
         loadUserData(uid);
     }, [uid]);
 
+    useEffect(() => {
+        const fetchQuests = async () => {
+            const questCollection = collection(db, 'quests');
+            const questSnapshot = await getDocs(questCollection);
+            const questList = questSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            // Filter out completed quests
+            const filteredQuests = questList.filter(quest => !completedQuests.includes(quest.id));
+            setQuests(filteredQuests);
+        };
+    
+        fetchQuests();
+    }, [completedQuests]);
+    
+
     const loadUserData = async (uid) => {
         try {
             const userRef = doc(db, 'users', uid);
@@ -69,10 +88,11 @@ function Earn() {
                 setHealth(userData.health);
                 setMaxHealth(userData.maxHealth);
                 setEnergy(userData.energy);
+                setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
                 setMaxEnergy(userData.maxEnergy);
                 setEnergyUpgradePrice(userData.energyUpgradePrice);
             } else {
-                await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
+                await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
             }
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -146,46 +166,45 @@ function Earn() {
 
 
 
-    const handleConfirmClick = () => {
-        if (buttonText === 'Confirm') {
-            // Open the link in a new tab
-            window.open(selectedQuest.link, '_blank');
+const handleConfirmClick = () => {
+    if (buttonText === 'Confirm') {
+        window.open(selectedQuest.link, '_blank');
+        setLoading(true);
+        setTimeout(() => {
+            setButtonText('Take Reward');
+            setLoading(false);
+        }, 5000);
+    } else {
+        handleReward();
+        setIsModalOpen(false); // Close the modal after reward is taken
+    }
+};
 
-            // Start the loading state and set a timeout to change the button text
-            setLoading(true);
-            setTimeout(() => {
-                setButtonText('Take Reward');
-                setLoading(false);
-            }, 5000);
-        } else {
-            // If the button says "Take Reward," award the reward and close the modal
-            handleReward();
-            setIsModalOpen(false)// Close the modal
-        }
-    };
+const handleReward = async () => {
+    try {
+        const questId = selectedQuest.id;
+        const rewardAmount = Number(selectedQuest.reward);
+        const newPetals = Number(petals) + rewardAmount;
 
-    const handleReward = async () => {
-        try {
-            // Add reward to user's petals balance and remove the quest from the database
-            const userId = uid; // replace with the actual user id
-            const questId = selectedQuest.id
-            const questDocRef = doc(db, 'quests', questId);
-            const rewardAmount = Number(selectedQuest.reward);
-            const newPetals = Number(petals) + rewardAmount;
-            setPetals(newPetals);
+        // Add reward to user's petals balance
+        setPetals(newPetals);
 
-            await updateDoc(doc(db, 'users', uid), { petals: newPetals });
+        // Update user's completed quests
+        const updatedCompletedQuests = [...completedQuests, questId];
+        setCompletedQuests(updatedCompletedQuests);
 
+        await updateDoc(doc(db, 'users', uid), {
+            petals: newPetals,
+            completedQuests: updatedCompletedQuests
+        });
 
-            // Remove quest from the database
-            await deleteDoc(questDocRef);
-            console.log(`Quest ${questId} successfully deleted`);
-            window.location.reload()
-        } catch (error) {
-            console.error("Error deleting quest: ", error);
-        }
+        console.log(`Quest ${questId} successfully marked as completed`);
+        window.location.reload();
+    } catch (error) {
+        console.error("Error completing quest: ", error);
+    }
+};
 
-    };
 
     const handleFreeClick = (num) => {
         const firstDiv = document.getElementById('firstBoost');

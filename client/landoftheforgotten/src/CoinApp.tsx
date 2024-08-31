@@ -43,6 +43,7 @@ const CoinApp = () => {
   const [increments, setIncrements] = useState([]);
   const [isPlanActive, setIsPlanActive] = useState(localStorage.getItem('isPlanActive'));
   const [tapEffect, setTapEffect] = useState(false);
+  const [completedQuests, setCompletedQuests] = useState([]);
   const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
   const [currentImage, setImage] = useState(skeleton); // Initial image
@@ -117,11 +118,12 @@ const CoinApp = () => {
         setBoostPrice(userData.boostPrice);
         setHealth(userData.health);
         setMaxHealth(userData.maxHealth);
+        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
         setEnergy(userData.energy);
         setMaxEnergy(userData.maxEnergy);
         setEnergyUpgradePrice(userData.energyUpgradePrice);
       } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
+        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
       }
     } catch (error) {
       console.error('Error loading user data:', error);

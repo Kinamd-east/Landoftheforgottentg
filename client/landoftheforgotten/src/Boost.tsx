@@ -31,6 +31,7 @@ function Boost() {
   const [tapPoints, setTapPoints] = useState(1);
   const [isTapBoostActive, setIsTapBoostActive] = useState(false);
   const [isCooldown, setIsCooldown] = useState(false);
+  const [completedQuests, setCompletedQuests] = useState([]);
   const [health, setHealth] = useState(1000000);
   const [maxHealth, setMaxHealth] = useState(1000000);
   const [planDuration, setPlanDuration] = useState(7); // Default to 7 days
@@ -131,8 +132,9 @@ function Boost() {
         setEnergy(userData.energy);
         setMaxEnergy(userData.maxEnergy);
         setEnergyUpgradePrice(userData.energyUpgradePrice);
+        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
       } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
+        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
       }
     } catch (error) {
       console.error('Error loading user data:', error);

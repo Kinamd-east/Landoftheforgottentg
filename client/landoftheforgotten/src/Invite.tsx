@@ -17,6 +17,7 @@ const generateUID = () => {
 const InvitePage = () => {
   const [inviteLink, setInviteLink] = useState('');
   const [buttonText, setButtonText] = useState('Confirm');
+  const [completedQuests, setCompletedQuests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [boostLevel, setBoostLevel] = useState(0);
   const [boostPrice, setBoostPrice] = useState(1000);
@@ -111,9 +112,10 @@ const InvitePage = () => {
         setMaxHealth(userData.maxHealth);
         setEnergy(userData.energy);
         setMaxEnergy(userData.maxEnergy);
+        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
         setEnergyUpgradePrice(userData.energyUpgradePrice);
       } else {
-        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [] });
+        await setDoc(userRef, { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [] });
       }
     } catch (error) {
       console.error('Error loading user data:', error);
