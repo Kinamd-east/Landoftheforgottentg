@@ -17,7 +17,7 @@ function Earn() {
     const [petals, setPetals] = useState(1000);
     const [buttonText, setButtonText] = useState('Confirm');
     const [loading, setLoading] = useState(false);
-    const [loadingPage, setLoadingPage] = useState(false)
+    const [loadingPage, setLoadingPage] = useState(true)
     const [boostLevel, setBoostLevel] = useState(0);
     const [boostPrice, setBoostPrice] = useState(1000);
     const [health, setHealth] = useState(1000000);

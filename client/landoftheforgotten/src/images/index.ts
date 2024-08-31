@@ -2,6 +2,7 @@ import bear from "./bear.png";
 import coin from "./coin.png";
 import highVoltage from "./high-voltage.png";
 import back2 from './2background.jpg'
+import back23 from './back.jpg'
 import skeleton3 from './skeleton3.png'
 import skeleton4 from './skeleton4.png'
 import skeleton5 from './skeleton5.png'
@@ -27,6 +28,7 @@ export {
     scare,
     heart,
     background,
+    back23,
     back3,
     back2,
     skeleton2,
