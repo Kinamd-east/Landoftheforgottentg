@@ -121,31 +121,31 @@ function Boost() {
 
   const loadUserData = async (uid) => {
     try {
-        const userRef = doc(db, 'users', uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            setPetals(userData.petals);
-            setBoostLevel(userData.boostLevel);
-            setBoostPrice(userData.boostPrice);
-            setHealth(userData.health);
-            setMaxHealth(userData.maxHealth);
-            setEnergy(userData.energy);
-            setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
-            setMaxEnergy(userData.maxEnergy);
-            setEnergyUpgradePrice(userData.energyUpgradePrice);
-            setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
-        } else {
-            const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] }};
-            await setDoc(userRef, defaultData);
-            setDailyLoginData(defaultData.dailyLoginData);
-        }
+      const userRef = doc(db, 'users', uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        setPetals(userData.petals);
+        setBoostLevel(userData.boostLevel);
+        setBoostPrice(userData.boostPrice);
+        setHealth(userData.health);
+        setMaxHealth(userData.maxHealth);
+        setEnergy(userData.energy);
+        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
+        setMaxEnergy(userData.maxEnergy);
+        setEnergyUpgradePrice(userData.energyUpgradePrice);
+        setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
+      } else {
+        const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] } };
+        await setDoc(userRef, defaultData);
+        setDailyLoginData(defaultData.dailyLoginData);
+      }
     } catch (error) {
-        console.error('Error loading user data:', error);
+      console.error('Error loading user data:', error);
     } finally {
-        setLoading(false); // Set loading to false after data is fetched
+      setLoading(false); // Set loading to false after data is fetched
     }
-};
+  };
 
 
 
@@ -312,31 +312,31 @@ function Boost() {
     const secondDiv = document.getElementById('secondBoost');
     const firstText = document.getElementById('firstBoostDiv');
     const secondText = document.getElementById('secondBoostDiv');
-  
+
     if (num === 1) {
       // Show first div and hide second div
       firstDiv?.classList.remove('hidden');
       secondDiv?.classList.add('hidden');
-  
+
       // Add active class to first text and remove from second text
       firstText?.classList.add('active');
       secondText?.classList.remove('active');
-  
+
       console.log('Free clicked 1');
     } else if (num === 2) {
       // Show second div and hide first div
       secondDiv?.classList.remove('hidden');
       firstDiv?.classList.add('hidden');
-  
+
       // Add active class to second text and remove from first text
       secondText?.classList.add('active');
       firstText?.classList.remove('active');
-  
+
       console.log('Free clicked 2');
     }
   };
 
-  const activateTapBoost = async() => {
+  const activateTapBoost = async () => {
     const originalBoostLevel = boostLevel;
     if (tapBoostCooldown) {
       alert('You have used all your free tapping boosts. Please wait 24 hours before using it again.');
@@ -352,37 +352,37 @@ function Boost() {
       return;
     }
 
-    if(!isTapBoostActive) {
+    if (!isTapBoostActive) {
       const updatedFreeTapBoostsUsed = freeTapBoostsUsed + 1;
 
-    let newBoostLevel;
-    if (boostLevel === 0) {
-      newBoostLevel = 10;
-    } else {
-      newBoostLevel = boostLevel * 10;
-    }
+      let newBoostLevel;
+      if (boostLevel === 0) {
+        newBoostLevel = 10;
+      } else {
+        newBoostLevel = boostLevel * 10;
+      }
 
-    console.log(`Boost level before activation: ${boostLevel}`);
-    setBoostLevel(newBoostLevel);
-    setIsTapBoostActive(true);
-    setFreeTapBoostsUsed(updatedFreeTapBoostsUsed);
-    localStorage.setItem('freeTapBoostsUsed', updatedFreeTapBoostsUsed.toString());
-    alert("Tap Boost active")
-    await updateDoc(doc(db, 'users', uid), { boostLevel: newBoostLevel });
+      console.log(`Boost level before activation: ${boostLevel}`);
+      setBoostLevel(newBoostLevel);
+      setIsTapBoostActive(true);
+      setFreeTapBoostsUsed(updatedFreeTapBoostsUsed);
+      localStorage.setItem('freeTapBoostsUsed', updatedFreeTapBoostsUsed.toString());
+      alert("Tap Boost active")
+      await updateDoc(doc(db, 'users', uid), { boostLevel: newBoostLevel });
 
-    console.log(`Boost level after activation: ${newBoostLevel}`);
-    setTimeout(async () => {
-      console.log('Tap boost time is up.');
-      setIsTapBoostActive(false);
-      setBoostLevel(originalBoostLevel);
-      await updateDoc(doc(db, 'users', uid), { boostLevel: originalBoostLevel });
-      console.log('Tap boost has ended, boost level reverted to 0', originalBoostLevel);
-      window.location.reload()
-    }, 10000);
+      console.log(`Boost level after activation: ${newBoostLevel}`);
+      setTimeout(async () => {
+        console.log('Tap boost time is up.');
+        setIsTapBoostActive(false);
+        setBoostLevel(originalBoostLevel);
+        await updateDoc(doc(db, 'users', uid), { boostLevel: originalBoostLevel });
+        console.log('Tap boost has ended, boost level reverted to 0', originalBoostLevel);
+        window.location.reload()
+      }, 10000);
     } else {
       alert("You already have an active boost")
     }
-    
+
   };
 
 
@@ -391,18 +391,13 @@ function Boost() {
   return (
     <div className="min-h-screen px-4 flex flex-col items-center text-white font-medium bg-[#1f1f1f]">
 
-      {/* <div className="absolute inset-0 h-1/2 bg-gradient-overlay z-0"></div> */}
-      {/* <div className="absolute inset-0 flex items-center justify-center z-0">
-        <div className="radial-gradient-overlay"></div>
-      </div> */}
-
       <div className="z-10 min-h-screen flex flex-col items-center text-white">
-      <Link to="/">
-        <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
-
-      </Link>
 
         <div className="top-0 left-0 px-4 pt-8 z-10 flex flex-col items-center text-white">
+        <Link to="/">
+          <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
+
+        </Link>
           <div className="mt-12 text-5xl font-bold flex items-center">
             <img src={coin} width={44} height={44} />
             <span className="ml-2">{petals.toLocaleString()}</span>
