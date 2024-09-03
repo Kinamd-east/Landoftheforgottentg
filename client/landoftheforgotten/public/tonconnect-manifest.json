@@ -1,5 +1,6 @@
 {
     "url": "https://tappingweb-6a7t.vercel.app/",
     "name": "Land of the forgotten",
-    "iconUrl": "https://tappingweb-6a7t.vercel.app/coin.png"
+    "iconUrl": "https://tappingweb-6a7t.vercel.app/coin.png",
+    "allowedDomains": ["https://tappingweb-6a7t.vercel.app"]
 }
