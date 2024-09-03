@@ -390,10 +390,6 @@ function Boost() {
 
   return (
     <div className="min-h-screen px-4 flex flex-col items-center text-white font-medium bg-[#1f1f1f]">
-      <Link to="/">
-        <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
-
-      </Link>
 
       {/* <div className="absolute inset-0 h-1/2 bg-gradient-overlay z-0"></div> */}
       {/* <div className="absolute inset-0 flex items-center justify-center z-0">
@@ -401,6 +397,10 @@ function Boost() {
       </div> */}
 
       <div className="z-10 min-h-screen flex flex-col items-center text-white">
+      <Link to="/">
+        <img src={Arrow} alt="" className="absolute top-4 left-4 w-12 h-12" />
+
+      </Link>
 
         <div className="top-0 left-0 px-4 pt-8 z-10 flex flex-col items-center text-white">
           <div className="mt-12 text-5xl font-bold flex items-center">
