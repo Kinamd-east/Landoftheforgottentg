@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './index.js'
-const manifestUrl = `${process.env.VITE_API_URL}/tonconnect-manifest.json`
+const manifestUrl = `https://github.com/OiseEjemai/tonconnect-manifest-json/blob/main/tonconnect-manifest.json`
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <TonConnectUIProvider manifestUrl={manifestUrl}>
