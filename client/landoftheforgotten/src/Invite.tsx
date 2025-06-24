@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import WebApp from '@twa-dev/sdk'
-import { doc, getDoc, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import LoadingPage from './LoadingPage';
 import { Link } from 'react-router-dom';
 import { db } from './firebase';
-import { background, back2, back3, coin, Arrow } from './images';
+import { coin, Arrow } from './images';
 
 
 const generateUID = () => {
@@ -16,24 +15,42 @@ const generateUID = () => {
 
 const InvitePage = () => {
   const [inviteLink, setInviteLink] = useState('');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [buttonText, setButtonText] = useState('Confirm');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [completedQuests, setCompletedQuests] = useState([]);
   const [loading, setLoading] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [boostLevel, setBoostLevel] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [boostPrice, setBoostPrice] = useState(1000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [health, setHealth] = useState(1000000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [maxHealth, setMaxHealth] = useState(1000000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [energy, setEnergy] = useState(1000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [maxEnergy, setMaxEnergy] = useState(1000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [energyUpgradePrice, setEnergyUpgradePrice] = useState(1000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [uid, setUid] = useState(localStorage.getItem('uid') || generateUID());
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [tapPosition, setTapPosition] = useState(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [increments, setIncrements] = useState([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [tapEffect, setTapEffect] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [clicks, setClicks] = useState([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [quests, setQuests] = useState([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isModalOpen, setIsModalOpen] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dailyLoginData, setDailyLoginData] = useState({ currentDay: 0, lastLogin: null, rewardsClaimed: [] });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedQuest, setSelectedQuest] = useState(null);
   const [petals, setPetals] = useState(0);
   const [invitedUsers, setInvitedUsers] = useState([]);
@@ -85,7 +102,7 @@ const InvitePage = () => {
     };
 
     handleReferral();
-  }, [location.search, uid]);
+  }, [uid]);
 
   useEffect(() => {
     if (uid) {

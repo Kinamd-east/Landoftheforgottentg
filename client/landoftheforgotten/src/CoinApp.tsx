@@ -1,14 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { db } from './firebase';
-import { Link } from 'react-router-dom';
-import LoadingPage from './LoadingPage';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { bear, coin, highVoltage, rocket, trophy, skeleton, heart, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8, background2 } from './images';
-import { back3 } from './images';
+import React, { useEffect, useMemo, useState } from "react";
+import { db } from "./firebase";
+import { Link } from "react-router-dom";
+import LoadingPage from "./LoadingPage";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  bear,
+  coin,
+  highVoltage,
+  rocket,
+  trophy,
+  skeleton,
+  heart,
+  skeleton2,
+  skeleton3,
+  skeleton4,
+  skeleton5,
+  skeleton6,
+  skeleton7,
+  skeleton8,
+} from "./images";
+import { back3 } from "./images";
 
 const generateUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 };
@@ -28,114 +44,205 @@ const VictoryModal = ({ onClose }) => (
   </div>
 );
 
-
 const CoinApp = () => {
   const [petals, setPetals] = useState(1000);
   const [boostLevel, setBoostLevel] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [boostPrice, setBoostPrice] = useState(1000);
   const [health, setHealth] = useState(1000000);
   const [maxHealth, setMaxHealth] = useState(1000000);
   const [energy, setEnergy] = useState(1000);
   const [maxEnergy, setMaxEnergy] = useState(1000);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [energyUpgradePrice, setEnergyUpgradePrice] = useState(1000);
-  const [uid, setUid] = useState(localStorage.getItem('uid') || generateUID());
+  const [uid, setUid] = useState(localStorage.getItem("uid") || generateUID());
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [tapPosition, setTapPosition] = useState(null);
-  const [increments, setIncrements] = useState([]);
-  const [isPlanActive, setIsPlanActive] = useState(localStorage.getItem('isPlanActive'));
+  type Increment = {
+    id: number;
+    x: number;
+    y: number;
+    value: number;
+  };
+
+  const [increments, setIncrements] = useState<Increment[]>([]);
+  const [isPlanActive, setIsPlanActive] = useState<boolean>(() => {
+    return localStorage.getItem("isPlanActive") === "true";
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [tapEffect, setTapEffect] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [completedQuests, setCompletedQuests] = useState([]);
-  const [clicks, setClicks] = useState([]);
+  type Click = {
+    id: number;
+    x: number;
+    y: number;
+    value: number;
+  };
+  const [clicks, setClicks] = useState<Click[]>([]);
   const [loading, setLoading] = useState(true); // Loading state
-  const [dailyLoginData, setDailyLoginData] = useState({ currentDay: 0, lastLogin: null, rewardsClaimed: [] });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [dailyLoginData, setDailyLoginData] = useState({
+    currentDay: 0,
+    lastLogin: null,
+    rewardsClaimed: [],
+  });
   const [currentImage, setImage] = useState(skeleton); // Initial image
   const [showVictoryModal, setShowVictoryModal] = useState(false); // New state for modal
 
-
-  const imagesArray = [skeleton, skeleton2, skeleton3, skeleton4, skeleton5, skeleton6, skeleton7, skeleton8];
-
+const imagesArray = useMemo(() => [
+  skeleton,
+  skeleton2,
+  skeleton3,
+  skeleton4,
+  skeleton5,
+  skeleton6,
+  skeleton7,
+  skeleton8,
+], []);
 
   useEffect(() => {
-    localStorage.setItem('uid', uid);
+    localStorage.setItem("uid", uid);
     loadUserData(uid);
   }, [uid]);
 
   useEffect(() => {
-    const index = (maxHealth / 1000000) - 1; // Determine the image based on maxHealth
+    const index = maxHealth / 1000000 - 1; // Determine the image based on maxHealth
     if (index >= 0 && index < imagesArray.length) {
       setImage(imagesArray[index]);
     }
-  }, [maxHealth]); // Run this effect whenever maxHealth changes
+  }, [maxHealth, imagesArray]); // Run this effect whenever maxHealth changes
 
   useEffect(() => {
-    // Attempt to retrieve the Telegram username
     const initializeUser = async () => {
-      let username;
+      let finalUid = uid;
+      let userInfo = {};
 
       try {
-        // This assumes you have access to Telegram WebApp SDK
-        username = window.Telegram.WebApp.initDataUnsafe.user.username;
+        const telegram = window?.Telegram?.WebApp;
+
+        if (
+          telegram &&
+          telegram.initDataUnsafe &&
+          telegram.initDataUnsafe.user
+        ) {
+          const user = telegram.initDataUnsafe.user;
+          finalUid = user.username || `tg_${user.id}`;
+
+          userInfo = {
+            telegramUsername: user.username || "",
+            telegramFirstName: user.first_name || "",
+            telegramLastName: user.last_name || "",
+            telegramId: user.id,
+            isBot: user.is_bot || false,
+            languageCode: user.language_code || "",
+            isPremium: user.is_premium || false,
+          };
+
+          console.log("Telegram user detected:", userInfo);
+        } else {
+          // Guest user fallback
+          finalUid = localStorage.getItem("uid") || generateUID();
+          console.log("Guest user detected:", finalUid);
+        }
       } catch (error) {
-        console.log("Telegram username not available:", error);
+        // Any error defaults to guest
+        finalUid = localStorage.getItem("uid") || generateUID();
+        console.warn("Error detecting Telegram user:", error);
       }
 
-      const finalUid = username || uid;
       setUid(finalUid);
-      localStorage.setItem('uid', finalUid);
+      localStorage.setItem("uid", finalUid);
+
+      // 🔥 FIX: Use setDoc(..., { merge: true }) so we create or update
+      if (Object.keys(userInfo).length > 0) {
+        try {
+          await setDoc(doc(db, "users", finalUid), userInfo, { merge: true });
+        } catch (err) {
+          console.error("Error saving Telegram info to Firestore:", err);
+        }
+      }
+
       await loadUserData(finalUid);
     };
 
     initializeUser();
-    window.Telegram.WebAPp
   }, [uid]);
 
   useEffect(() => {
-    const storedPlanActive = localStorage.getItem('isPlanActive');
-    if (storedPlanActive === 'true') {
+    const storedPlanActive = localStorage.getItem("isPlanActive");
+    if (storedPlanActive === "true") {
       setIsPlanActive(true);
+      localStorage.setItem("isPlanActive", "true");
     }
   }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (energy < maxEnergy && health < maxHealth && !isPlanActive) {
-        console.log(isPlanActive)
-        setHealth(prev => Math.min(prev + 1, maxHealth));
-        setEnergy(prev => Math.max(prev - 1, 0));
-        updateDoc(doc(db, 'users', uid), { health: Math.min(health + 1, maxHealth), energy: Math.max(energy - 1, 0) });
+        console.log(isPlanActive);
+        setHealth((prev) => Math.min(prev + 1, maxHealth));
+        setEnergy((prev) => Math.max(prev - 1, 0));
+        updateDoc(doc(db, "users", uid), {
+          health: Math.min(health + 1, maxHealth),
+          energy: Math.max(energy - 1, 0),
+        });
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [energy, health, maxEnergy, maxHealth, uid]);
+  }, [energy, health, maxEnergy, maxHealth, uid, isPlanActive]);
 
   const loadUserData = async (uid) => {
     try {
-        const userRef = doc(db, 'users', uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            setPetals(userData.petals);
-            setBoostLevel(userData.boostLevel);
-            setBoostPrice(userData.boostPrice);
-            setHealth(userData.health);
-            setMaxHealth(userData.maxHealth);
-            setEnergy(userData.energy);
-            setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
-            setMaxEnergy(userData.maxEnergy);
-            setEnergyUpgradePrice(userData.energyUpgradePrice);
-            setDailyLoginData(userData.dailyLoginData || { currentDay: 0, lastLogin: null, rewardsClaimed: [] }); // Initialize dailyLoginData if not present
-        } else {
-            const defaultData = { petals: 1000, boostLevel: 0, boostPrice: 1000, health: 1000000, maxHealth: 1000000, energy: 1000, maxEnergy: 1000, energyUpgradePrice: 1000, invitedUsers: [], completedQuests: [], dailyLoginData: { currentDay: 0, lastLogin: null, rewardsClaimed: [] }};
-            await setDoc(userRef, defaultData);
-            setDailyLoginData(defaultData.dailyLoginData);
-        }
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        setPetals(userData.petals);
+        setBoostLevel(userData.boostLevel);
+        setBoostPrice(userData.boostPrice);
+        setHealth(userData.health);
+        setMaxHealth(userData.maxHealth);
+        setEnergy(userData.energy);
+        setCompletedQuests(userData.completedQuests || []); // Initialize completedQuests if not present
+        setMaxEnergy(userData.maxEnergy);
+        setEnergyUpgradePrice(userData.energyUpgradePrice);
+        console.log(userData);
+        setDailyLoginData(
+          userData.dailyLoginData || {
+            currentDay: 0,
+            lastLogin: null,
+            rewardsClaimed: [],
+          }
+        ); // Initialize dailyLoginData if not present
+      } else {
+        const defaultData = {
+          petals: 1000,
+          boostLevel: 0,
+          boostPrice: 1000,
+          health: 1000000,
+          maxHealth: 1000000,
+          energy: 1000,
+          maxEnergy: 1000,
+          energyUpgradePrice: 1000,
+          invitedUsers: [],
+          completedQuests: [],
+          dailyLoginData: {
+            currentDay: 0,
+            lastLogin: null,
+            rewardsClaimed: [],
+          },
+        };
+        await setDoc(userRef, defaultData);
+        setDailyLoginData(defaultData.dailyLoginData);
+      }
     } catch (error) {
-        console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
     } finally {
-        setLoading(false); // Set loading to false after data is fetched
+      setLoading(false); // Set loading to false after data is fetched
     }
-};
-
-
+  };
 
   const handleTap = async (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (loading || energy <= 0) return;
@@ -143,15 +250,15 @@ const CoinApp = () => {
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left; // Relative x position
-    const y = e.clientY - rect.top;   // Relative y position
-    const imageElement = e.currentTarget.querySelector('img');
+    const y = e.clientY - rect.top; // Relative y position
+    const imageElement = e.currentTarget.querySelector("img");
 
     if (imageElement) {
-      imageElement.classList.add('vibrate');
+      imageElement.classList.add("vibrate");
 
       // Remove the class after the animation ends
       setTimeout(() => {
-        imageElement.classList.remove('vibrate');
+        imageElement.classList.remove("vibrate");
       }, 300); // Match the duration of the animation (0.3s)
     }
 
@@ -165,21 +272,28 @@ const CoinApp = () => {
     const newHealth = Math.max(health - incrementValue, 0);
     const newEnergy = Math.max(energy - incrementValue, 0);
 
-    setPetals(newPetals)
+    setPetals(newPetals);
     setHealth(newHealth);
     setEnergy(newEnergy);
     setClicks([...clicks, { id: Date.now(), x, y, value: incrementValue }]);
 
-    await updateDoc(doc(db, 'users', uid), { petals: newPetals, health: newHealth, energy: newEnergy });
+    await updateDoc(doc(db, "users", uid), {
+      petals: newPetals,
+      health: newHealth,
+      energy: newEnergy,
+    });
 
     if (newHealth === 0) {
       const nextMaxHealth = maxHealth + 1000000;
       setMaxHealth(nextMaxHealth);
       setShowVictoryModal(true);
       setHealth(nextMaxHealth);
-      await updateDoc(doc(db, 'users', uid), { maxHealth: nextMaxHealth, health: nextMaxHealth });
+      await updateDoc(doc(db, "users", uid), {
+        maxHealth: nextMaxHealth,
+        health: nextMaxHealth,
+      });
       // Update the image based on the new maxHealth
-      const index = (nextMaxHealth / 1000000) - 1;
+      const index = nextMaxHealth / 1000000 - 1;
       if (index >= 0 && index < imagesArray.length) {
         setImage(imagesArray[index]);
       }
@@ -189,20 +303,21 @@ const CoinApp = () => {
   useEffect(() => {
     if (increments.length > 0) {
       const timer = setTimeout(() => {
-        setIncrements(increments.filter(increment => Date.now() - increment.id < 1000));
+        setIncrements(
+          increments.filter((increment) => Date.now() - increment.id < 1000)
+        );
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [increments]);
 
   const handleAnimationEnd = (id: number) => {
-    setClicks((prevClicks) => prevClicks.filter(click => click.id !== id));
+    setClicks((prevClicks) => prevClicks.filter((click) => click.id !== id));
   };
 
   const closeVictoryModal = () => {
     setShowVictoryModal(false);
   };
-
 
   // function triggerBannerSlideIn() {
   //   if (allowBannerSlideIn) {
@@ -213,26 +328,29 @@ const CoinApp = () => {
   //   }
   // }
 
-  function closeModal() {
-    const banner = document.getElementById('marketing-banner');
-    banner?.classList.remove("slide-in");
-  }
-
   // Example usage
   // runInitialFunction(); // This function needs to be called first
   // triggerBannerSlideIn(); // This triggers the banner animation after 5 seconds
 
-
   if (loading) return <LoadingPage />; // Show loading indicator
 
   return (
-    <div className="min-h-screen px-4 flex flex-col items-center text-white font-medium" style={{
-      backgroundImage: `url(${back3})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', height: '100vh' // Ensures it takes the full viewport height
-    }}>
+    <div
+      className="min-h-screen px-4 flex flex-col items-center text-white font-medium"
+      style={{
+        backgroundImage: `url(${back3})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        height: "100vh", // Ensures it takes the full viewport height
+      }}
+    >
       <div className="fixed top-0 left-0 w-full px-4 pt-8 z-10 flex flex-col items-center text-white">
         <div className="mt-12 text-5xl font-bold flex items-center">
           <img src={coin} width={44} height={44} />
-          <span className="ml-2" id="petalCount">{petals.toLocaleString()}</span>
+          <span className="ml-2" id="petalCount">
+            {petals.toLocaleString()}
+          </span>
         </div>
         <div className="text-base mt-2 flex items-center">
           <img src={trophy} width={24} height={24} />
@@ -243,16 +361,29 @@ const CoinApp = () => {
           <div className="flex items-center justify-center divforfriends">
             <img src={heart} width={44} height={44} alt="High Voltage" />
             <div className="ml-2 text-left">
-              <span className="text-white text-2xl font-bold block">{health}</span>
-              <span className="text-white text-large opacity-75">/ {maxHealth}</span>
+              <span className="text-white text-2xl font-bold block">
+                {health}
+              </span>
+              <span className="text-white text-large opacity-75">
+                / {maxHealth}
+              </span>
             </div>
           </div>
           <div className="w-1/3 flex items-center justify-start max-w-32">
             <div className="flex items-center justify-center divforfriends">
-              <img src={highVoltage} width={44} height={44} alt="High Voltage" />
+              <img
+                src={highVoltage}
+                width={44}
+                height={44}
+                alt="High Voltage"
+              />
               <div className="ml-2 text-left">
-                <span className="text-white text-2xl font-bold block">{energy}</span>
-                <span className="text-white text-large opacity-75">/ {maxEnergy}</span>
+                <span className="text-white text-2xl font-bold block">
+                  {energy}
+                </span>
+                <span className="text-white text-large opacity-75">
+                  / {maxEnergy}
+                </span>
               </div>
             </div>
           </div>
@@ -283,7 +414,10 @@ const CoinApp = () => {
           </div>
         </div>
         <div className="progress-container sm:order-1">
-          <div className="progress-bar" style={{ width: `${(energy / maxEnergy) * 100}%` }}></div>
+          <div
+            className="progress-bar"
+            style={{ width: `${(energy / maxEnergy) * 100}%` }}
+          ></div>
         </div>
       </div>
       {/* <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -315,7 +449,13 @@ const CoinApp = () => {
       </div> */}
       <div className="flex-grow flex items-center justify-center">
         <div className="relative mt-20 tap-animation" onClick={handleTap}>
-          <img src={currentImage} width={300} height={300} alt="landoftheforgotten" className='flex-wrap ' />
+          <img
+            src={currentImage}
+            width={300}
+            height={300}
+            alt="landoftheforgotten"
+            className="flex-wrap "
+          />
           {clicks.map((click) => (
             <div
               key={click.id}
@@ -323,21 +463,19 @@ const CoinApp = () => {
               style={{
                 top: `${click.y}px`,
                 left: `${click.x}px`,
-                transform: 'translate(-50%, -50%)',
-                animation: 'float 1s ease-out'
+                transform: "translate(-50%, -50%)",
+                animation: "float 1s ease-out",
               }}
               // onAnimationEnd={() => handleAnimationEnd(click.id)}
-              onAnimationEnd={() => handleAnimationEnd(click.id)}>
+              onAnimationEnd={() => handleAnimationEnd(click.id)}
+            >
               +{click.value}
             </div>
           ))}
         </div>
-
-
       </div>
 
       {showVictoryModal && <VictoryModal onClose={closeVictoryModal} />}
-
     </div>
   );
 };
