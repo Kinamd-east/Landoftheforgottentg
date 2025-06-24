@@ -128,7 +128,7 @@ const imagesArray = useMemo(() => [
           telegram.initDataUnsafe.user
         ) {
           const user = telegram.initDataUnsafe.user;
-          finalUid = user.username || `tg_${user.id}`;
+          finalUid = user.id;
 
           userInfo = {
             telegramUsername: user.username || "",
