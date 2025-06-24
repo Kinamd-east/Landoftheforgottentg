@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import LoadingPage from "./LoadingPage";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import {
-  bear,
+  // bear,
   coin,
   highVoltage,
   rocket,
@@ -28,6 +28,17 @@ const generateUID = () => {
     return v.toString(16);
   });
 };
+
+type TelegramUserInfo = {
+  telegramUsername: string;
+  telegramFirstName: string;
+  telegramLastName: string;
+  telegramId: number;
+  isBot: boolean;
+  languageCode: string;
+  isPremium: boolean;
+};
+
 
 const VictoryModal = ({ onClose }) => (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -116,56 +127,74 @@ const imagesArray = useMemo(() => [
 
   useEffect(() => {
     const initializeUser = async () => {
-      let finalUid = uid;
-      let userInfo = {};
+  let finalUid = uid;
+  let userInfo: Partial<TelegramUserInfo> = {};
 
-      try {
-        const telegram = window?.Telegram?.WebApp;
 
-        if (
-          telegram &&
-          telegram.initDataUnsafe &&
-          telegram.initDataUnsafe.user
-        ) {
-          const user = telegram.initDataUnsafe.user;
-          finalUid = user.id;
+  try {
+    const telegram = window?.Telegram?.WebApp;
 
-          userInfo = {
-            telegramUsername: user.username || "",
-            telegramFirstName: user.first_name || "",
-            telegramLastName: user.last_name || "",
-            telegramId: user.id,
-            isBot: user.is_bot || false,
-            languageCode: user.language_code || "",
-            isPremium: user.is_premium || false,
-          };
+    if (telegram?.initDataUnsafe?.user) {
+      const user = telegram.initDataUnsafe.user;
+      finalUid = user.id.toString(); // Convert to string for Firestore key
 
-          console.log("Telegram user detected:", userInfo);
-        } else {
-          // Guest user fallback
-          finalUid = localStorage.getItem("uid") || generateUID();
-          console.log("Guest user detected:", finalUid);
-        }
-      } catch (error) {
-        // Any error defaults to guest
-        finalUid = localStorage.getItem("uid") || generateUID();
-        console.warn("Error detecting Telegram user:", error);
-      }
+      userInfo = {
+        telegramUsername: user.username || "",
+        telegramFirstName: user.first_name || "",
+        telegramLastName: user.last_name || "",
+        telegramId: user.id,
+        isBot: user.is_bot || false,
+        languageCode: user.language_code || "",
+        isPremium: user.is_premium || false,
+      };
 
-      setUid(finalUid);
-      localStorage.setItem("uid", finalUid);
+      console.log("Telegram user detected:", userInfo);
+    } else {
+      finalUid = localStorage.getItem("uid") || generateUID();
+      console.log("Guest user detected:", finalUid);
+    }
+  } catch (error) {
+    finalUid = localStorage.getItem("uid") || generateUID();
+    console.warn("Error detecting Telegram user:", error);
+  }
 
-      // 🔥 FIX: Use setDoc(..., { merge: true }) so we create or update
-      if (Object.keys(userInfo).length > 0) {
-        try {
-          await setDoc(doc(db, "users", finalUid), userInfo, { merge: true });
-        } catch (err) {
-          console.error("Error saving Telegram info to Firestore:", err);
-        }
-      }
+  setUid(finalUid);
+  localStorage.setItem("uid", finalUid);
 
-      await loadUserData(finalUid);
+  // Merge Telegram info with default game values if new user
+  const userRef = doc(db, "users", finalUid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    const defaultData = {
+      petals: 1000,
+      boostLevel: 0,
+      boostPrice: 1000,
+      health: 1000000,
+      maxHealth: 1000000,
+      energy: 1000,
+      maxEnergy: 1000,
+      energyUpgradePrice: 1000,
+      invitedUsers: [],
+      completedQuests: [],
+      dailyLoginData: {
+        currentDay: 0,
+        lastLogin: null,
+        rewardsClaimed: [],
+      },
     };
+
+    await setDoc(userRef, { ...defaultData, ...userInfo }, { merge: true });
+  } else {
+    // Still update telegram info if already exists
+    if (Object.keys(userInfo).length > 0) {
+      await setDoc(userRef, userInfo, { merge: true });
+    }
+  }
+
+  await loadUserData(finalUid);
+};
+
 
     initializeUser();
   }, [uid]);
@@ -390,13 +419,13 @@ const imagesArray = useMemo(() => [
         </div>
         <div className="flex-grow flex items-center max-w-70 text-sm">
           <div className="w-full bg-[#b69a47] py-4 rounded-2xl flex justify-around">
-            <a href="/invites">
+            {/* <a href="/invites">
               <button className="flex flex-col items-center gap-1">
                 <img src={bear} width={30} height={30} alt="Invites" />
                 <span>Invites</span>
               </button>
               <div className="dot"></div>
-            </a>
+            </a> */}
             <div className="h-[48px] w-[2px] bg-[#fddb6d]"></div>
             <button className="flex flex-col items-center gap-1">
               <Link to="/earn">
