@@ -3,12 +3,12 @@ import { getFirestore } from "firebase/firestore";
 import {getAuth} from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAJ_AV3bA_8gryy1wFUXksWHSYUVHKC6wI",
-  authDomain: "landoftheforgotten-1651c.firebaseapp.com",
-  projectId: "landoftheforgotten-1651c",
-  storageBucket: "landoftheforgotten-1651c.firebasestorage.app",
-  messagingSenderId: "332030343716",
-  appId: "1:332030343716:web:b015de597836ba441f36b1",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 
